@@ -29,5 +29,11 @@
     "@opentui/core": "^0.1.75",
     "@opentui/react": "^0.1.75",
     "react": "^19.2.4"
+  },
+  "optionalDependencies": {
+    "@opentui/core-darwin-arm64": "^0.1.75",
+    "@opentui/core-darwin-x64": "^0.1.75",
+    "@opentui/core-linux-arm64": "^0.1.75",
+    "@opentui/core-linux-x64": "^0.1.75"
   }
 }

@@ -20,6 +20,21 @@ jobs:
 
       - run: bun install
 
+      - name: Install cross-platform native bindings
+        run: |
+          # Platform-specific packages have os/cpu fields that prevent cross-platform install
+          # Download and extract them manually for cross-compilation
+          OPENTUI_VERSION="0.1.75"
+          for platform in linux-x64 linux-arm64 darwin-x64 darwin-arm64; do
+            pkg="@opentui/core-${platform}"
+            dir="node_modules/@opentui/core-${platform}"
+            if [ ! -d "$dir" ]; then
+              echo "Installing ${pkg}..."
+              mkdir -p "$dir"
+              curl -sL "https://registry.npmjs.org/${pkg}/-/core-${platform}-${OPENTUI_VERSION}.tgz" | tar -xz -C "$dir" --strip-components=1
+            fi
+          done
+
       - name: Build all platforms
         run: |
           mkdir -p dist
