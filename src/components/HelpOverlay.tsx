@@ -56,6 +56,10 @@ export function HelpOverlay({ onClose }: HelpOverlayProps) {
           <span>Refresh</span>
         </text>
         <text>
+          <span fg="#6b7280">L (Shift+l)      </span>
+          <span>Logout</span>
+        </text>
+        <text>
           <span fg="#6b7280">q                </span>
           <span>Quit</span>
         </text>

@@ -108,6 +108,12 @@ function MainApp({ onExit }: AppProps) {
       return;
     }
 
+    // Logout shortcut (shift+L)
+    if (key.name === "l" && key.shift && auth.isAuthenticated) {
+      auth.logout();
+      return;
+    }
+
     if (key.sequence === "?") {
       setShowHelp((prev) => !prev);
       return;
@@ -217,7 +223,7 @@ function MainApp({ onExit }: AppProps) {
     return (
       <AuthContext.Provider value={auth}>
         <box style={{ flexDirection: "column", height: "100%" }}>
-          <Header />
+          <Header isAuthenticated={auth.isAuthenticated} />
           <AuthScreen
             deviceCode={auth.deviceCode}
             error={auth.error}
@@ -234,7 +240,7 @@ function MainApp({ onExit }: AppProps) {
     return (
       <AuthContext.Provider value={auth}>
         <box style={{ flexDirection: "column", height: "100%" }}>
-          <Header />
+          <Header isAuthenticated={auth.isAuthenticated} />
           <box style={{ flexDirection: "column", border: true, padding: 1, flexGrow: 1 }}>
             <box style={{ flexDirection: "row", justifyContent: "space-between" }}>
               <text>
@@ -264,7 +270,7 @@ function MainApp({ onExit }: AppProps) {
     return (
       <AuthContext.Provider value={auth}>
         <box style={{ flexDirection: "column", height: "100%" }}>
-          <Header />
+          <Header isAuthenticated={auth.isAuthenticated} />
           <RunDetail
             run={github.selectedRun}
             jobs={github.jobs}
@@ -282,7 +288,7 @@ function MainApp({ onExit }: AppProps) {
   return (
     <AuthContext.Provider value={auth}>
       <box style={{ flexDirection: "column", height: "100%" }}>
-        <Header />
+        <Header isAuthenticated={auth.isAuthenticated} />
 
         <box style={{ border: true }}>
           <RepoList
@@ -326,7 +332,7 @@ function MainApp({ onExit }: AppProps) {
         <box style={{ border: true, padding: 1 }}>
           <text>
             <span fg="#6b7280">
-              [Enter] View details [r] Refresh [/] Search [Tab] Switch repo [?] Help [q] Quit
+              [Enter] View details [r] Refresh [/] Search [Tab] Switch repo [?] Help [L] Logout [q] Quit
             </span>
           </text>
         </box>
