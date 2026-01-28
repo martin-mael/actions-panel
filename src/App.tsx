@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useKeyboard } from "@opentui/react";
 import { useAuthProvider, AuthContext } from "./hooks/useAuth.ts";
 import { useGitHub } from "./hooks/useGitHub.ts";
@@ -11,7 +11,11 @@ import { RunDetail } from "./components/RunDetail.tsx";
 import { SearchInput } from "./components/SearchInput.tsx";
 import { HelpOverlay } from "./components/HelpOverlay.tsx";
 
-function MainApp() {
+interface AppProps {
+  onExit: () => void;
+}
+
+function MainApp({ onExit }: AppProps) {
   const auth = useAuthProvider();
   const github = useGitHub(auth.token);
 
@@ -51,7 +55,8 @@ function MainApp() {
   useKeyboard((key) => {
     // Global shortcuts
     if (key.name === "q") {
-      process.exit(0);
+      onExit();
+      return;
     }
 
     if (key.sequence === "?") {
@@ -218,6 +223,6 @@ function MainApp() {
   );
 }
 
-export function App() {
-  return <MainApp />;
+export function App({ onExit }: AppProps) {
+  return <MainApp onExit={onExit} />;
 }

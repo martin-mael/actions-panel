@@ -1,4 +1,4 @@
-import { StatusBadge } from "./StatusBadge.tsx";
+import { StatusSymbol } from "./StatusBadge.tsx";
 import type { WorkflowRun } from "../types/github.ts";
 
 interface RunsListProps {
@@ -71,7 +71,7 @@ export function RunsList({ runs, selectedIndex, filter }: RunsListProps) {
             {isSelected ? (
               <text>
                 <span fg="#06b6d4">&gt; </span>
-                <StatusBadge status={run.status} conclusion={run.conclusion} />
+                <StatusSymbol status={run.status} conclusion={run.conclusion} />
                 <span fg="#ffffff"> #{run.run_number} </span>
                 <span fg="#ffffff">{run.name.slice(0, 25).padEnd(25)}</span>
                 <span fg="#3b82f6">{run.head_branch.slice(0, 15).padEnd(15)}</span>
@@ -81,7 +81,7 @@ export function RunsList({ runs, selectedIndex, filter }: RunsListProps) {
             ) : (
               <text>
                 <span fg="#6b7280">  </span>
-                <StatusBadge status={run.status} conclusion={run.conclusion} />
+                <StatusSymbol status={run.status} conclusion={run.conclusion} />
                 <span fg="#9ca3af"> #{run.run_number} </span>
                 <span fg="#9ca3af">{run.name.slice(0, 25).padEnd(25)}</span>
                 <span fg="#3b82f6">{run.head_branch.slice(0, 15).padEnd(15)}</span>

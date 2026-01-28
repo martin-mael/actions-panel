@@ -1,4 +1,4 @@
-import { StatusBadge } from "./StatusBadge.tsx";
+import { StatusSymbol } from "./StatusBadge.tsx";
 import type { WorkflowRun, Job } from "../types/github.ts";
 
 interface RunDetailProps {
@@ -41,7 +41,7 @@ export function RunDetail({ run, jobs, loading }: RunDetailProps) {
         <box style={{ flexDirection: "row", gap: 4 }}>
           <text>
             <span fg="#6b7280">Status: </span>
-            <StatusBadge status={run.status} conclusion={run.conclusion} />
+            <StatusSymbol status={run.status} conclusion={run.conclusion} />
             <span> {run.conclusion || run.status}</span>
           </text>
           <text>
@@ -86,7 +86,7 @@ export function RunDetail({ run, jobs, loading }: RunDetailProps) {
             <box key={job.id} style={{ flexDirection: "column", marginLeft: 1 }}>
               <text>
                 <span fg="#6b7280">{jobIndex === jobs.length - 1 ? "└─ " : "├─ "}</span>
-                <StatusBadge status={job.status} conclusion={job.conclusion} />
+                <StatusSymbol status={job.status} conclusion={job.conclusion} />
                 <span> {job.name}</span>
                 <span fg="#6b7280"> ({formatDuration(job.started_at, job.completed_at)})</span>
               </text>
@@ -98,7 +98,7 @@ export function RunDetail({ run, jobs, loading }: RunDetailProps) {
                   </span>
                   <span>{step.name}</span>
                   <span fg="#6b7280"> </span>
-                  <StatusBadge status={step.status} conclusion={step.conclusion} />
+                  <StatusSymbol status={step.status} conclusion={step.conclusion} />
                   <span fg="#6b7280"> {formatDuration(step.started_at, step.completed_at)}</span>
                 </text>
               ))}
