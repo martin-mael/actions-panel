@@ -1,0 +1,24 @@
+name: Test Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run random duration test
+        run: |
+          # Sleep for 10-20 seconds
+          SLEEP_TIME=$((10 + RANDOM % 11))
+          echo "Sleeping for $SLEEP_TIME seconds..."
+          sleep $SLEEP_TIME
+
+          # 50% chance of failure
+          if [ $((RANDOM % 2)) -eq 0 ]; then
+            echo "Test passed!"
+            exit 0
+          else
+            echo "Test failed!"
+            exit 1
+          fi
