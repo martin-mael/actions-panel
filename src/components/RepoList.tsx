@@ -6,6 +6,8 @@ interface RepoListProps {
   onSelect: (repo: Repository) => void;
 }
 
+const MAX_VISIBLE = 8;
+
 export function RepoList({ repos, selectedRepo }: RepoListProps) {
   if (repos.length === 0) {
     return (
@@ -17,12 +19,42 @@ export function RepoList({ repos, selectedRepo }: RepoListProps) {
     );
   }
 
+  // Find the selected index
+  const selectedIndex = repos.findIndex((r) => r.id === selectedRepo?.id);
+
+  // Calculate visible window around selected repo
+  let startIndex = 0;
+  let endIndex = Math.min(MAX_VISIBLE, repos.length);
+
+  if (repos.length > MAX_VISIBLE && selectedIndex >= 0) {
+    // Center the selected repo in the visible window
+    const halfWindow = Math.floor(MAX_VISIBLE / 2);
+    startIndex = Math.max(0, selectedIndex - halfWindow);
+    endIndex = startIndex + MAX_VISIBLE;
+
+    // Adjust if we're near the end
+    if (endIndex > repos.length) {
+      endIndex = repos.length;
+      startIndex = Math.max(0, endIndex - MAX_VISIBLE);
+    }
+  }
+
+  const visibleRepos = repos.slice(startIndex, endIndex);
+  const hasMore = repos.length > MAX_VISIBLE;
+  const showLeftIndicator = startIndex > 0;
+  const showRightIndicator = endIndex < repos.length;
+
   return (
     <box style={{ flexDirection: "row", padding: 1, gap: 1 }}>
       <text>
         <span fg="#6b7280">Repos: </span>
       </text>
-      {repos.slice(0, 10).map((repo) => {
+      {showLeftIndicator && (
+        <text>
+          <span fg="#6b7280">{"<"} </span>
+        </text>
+      )}
+      {visibleRepos.map((repo) => {
         const isSelected = selectedRepo?.id === repo.id;
         if (isSelected) {
           return (
@@ -37,9 +69,14 @@ export function RepoList({ repos, selectedRepo }: RepoListProps) {
           </text>
         );
       })}
-      {repos.length > 10 && (
+      {showRightIndicator && (
         <text>
-          <span fg="#6b7280">+{repos.length - 10} more</span>
+          <span fg="#6b7280"> {">"}</span>
+        </text>
+      )}
+      {hasMore && (
+        <text>
+          <span fg="#6b7280"> ({selectedIndex + 1}/{repos.length})</span>
         </text>
       )}
     </box>

@@ -10,6 +10,8 @@ export function useGitHub(token: string | null) {
   const [runs, setRuns] = useState<WorkflowRun[]>([]);
   const [selectedRun, setSelectedRun] = useState<WorkflowRun | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [jobLogs, setJobLogs] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,12 +69,37 @@ export function useGitHub(token: string | null) {
 
   const selectRun = useCallback((run: WorkflowRun | null) => {
     setSelectedRun(run);
+    setSelectedJob(null);
+    setJobLogs(null);
     if (run) {
       fetchJobs(run);
     } else {
       setJobs([]);
     }
   }, [fetchJobs]);
+
+  const fetchJobLogs = useCallback(async (job: Job) => {
+    if (!client || !selectedRepo) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const logs = await client.getJobLogs(selectedRepo.owner.login, selectedRepo.name, job.id);
+      setJobLogs(logs);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch job logs");
+    } finally {
+      setLoading(false);
+    }
+  }, [client, selectedRepo]);
+
+  const selectJob = useCallback((job: Job | null) => {
+    setSelectedJob(job);
+    if (job) {
+      fetchJobLogs(job);
+    } else {
+      setJobLogs(null);
+    }
+  }, [fetchJobLogs]);
 
   const refresh = useCallback(() => {
     if (selectedRun) {
@@ -102,6 +129,9 @@ export function useGitHub(token: string | null) {
     selectedRun,
     selectRun,
     jobs,
+    selectedJob,
+    selectJob,
+    jobLogs,
     loading,
     error,
     refresh,

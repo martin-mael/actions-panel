@@ -77,4 +77,20 @@ export class GitHubClient {
     );
     return response.jobs;
   }
+
+  async getJobLogs(owner: string, repo: string, jobId: number): Promise<string> {
+    const response = await fetch(`${API_BASE}/repos/${owner}/${repo}/actions/jobs/${jobId}/logs`, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${this.token}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+    }
+
+    return response.text();
+  }
 }

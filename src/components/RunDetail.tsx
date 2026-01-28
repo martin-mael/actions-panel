@@ -1,10 +1,13 @@
 import { StatusSymbol } from "./StatusBadge.tsx";
-import type { WorkflowRun, Job } from "../types/github.ts";
+import type { WorkflowRun, Job, Step } from "../types/github.ts";
 
 interface RunDetailProps {
   run: WorkflowRun;
   jobs: Job[];
   loading: boolean;
+  selectedJobIndex: number;
+  selectedStepIndex: number | null;
+  onSelectJob: (job: Job) => void;
 }
 
 function formatDuration(startDate: string | null, endDate: string | null): string {
@@ -25,7 +28,33 @@ function formatDateTime(dateString: string): string {
   return date.toLocaleString();
 }
 
-export function RunDetail({ run, jobs, loading }: RunDetailProps) {
+export function RunDetail({ run, jobs, loading, selectedJobIndex, selectedStepIndex, onSelectJob }: RunDetailProps) {
+  // Build a flat list of selectable items (jobs and their steps)
+  const items: Array<{ type: "job"; job: Job; jobIndex: number } | { type: "step"; step: Step; job: Job; jobIndex: number; stepIndex: number }> = [];
+
+  jobs.forEach((job, jobIndex) => {
+    items.push({ type: "job", job, jobIndex });
+    if (job.steps) {
+      job.steps.forEach((step, stepIndex) => {
+        items.push({ type: "step", step, job, jobIndex, stepIndex });
+      });
+    }
+  });
+
+  // Calculate current selection index in flat list
+  let currentFlatIndex = 0;
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i]!;
+    if (item.type === "job" && item.jobIndex === selectedJobIndex && selectedStepIndex === null) {
+      currentFlatIndex = i;
+      break;
+    }
+    if (item.type === "step" && item.jobIndex === selectedJobIndex && item.stepIndex === selectedStepIndex) {
+      currentFlatIndex = i;
+      break;
+    }
+  }
+
   return (
     <box style={{ flexDirection: "column", border: true, padding: 1 }}>
       <box style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -33,7 +62,7 @@ export function RunDetail({ run, jobs, loading }: RunDetailProps) {
           <strong fg="#06b6d4">Run #{run.run_number}: {run.name}</strong>
         </text>
         <text>
-          <span fg="#6b7280">[Esc] Back</span>
+          <span fg="#6b7280">[Esc] Back [Enter] View Logs</span>
         </text>
       </box>
 
@@ -71,7 +100,8 @@ export function RunDetail({ run, jobs, loading }: RunDetailProps) {
 
       <box style={{ flexDirection: "column", padding: 1 }}>
         <text>
-          <strong>Jobs:</strong>
+          <strong>Jobs & Steps:</strong>
+          <span fg="#6b7280"> (j/k to navigate, Enter to view logs)</span>
         </text>
         {loading ? (
           <text>
@@ -82,28 +112,54 @@ export function RunDetail({ run, jobs, loading }: RunDetailProps) {
             <span fg="#6b7280">No jobs found</span>
           </text>
         ) : (
-          jobs.map((job, jobIndex) => (
-            <box key={job.id} style={{ flexDirection: "column", marginLeft: 1 }}>
-              <text>
-                <span fg="#6b7280">{jobIndex === jobs.length - 1 ? "└─ " : "├─ "}</span>
-                <StatusSymbol status={job.status} conclusion={job.conclusion} />
-                <span> {job.name}</span>
-                <span fg="#6b7280"> ({formatDuration(job.started_at, job.completed_at)})</span>
-              </text>
-              {job.steps && job.steps.map((step, stepIndex) => (
-                <text key={step.number}>
-                  <span fg="#6b7280">
-                    {jobIndex === jobs.length - 1 ? "   " : "│  "}
-                    {stepIndex === job.steps.length - 1 ? "└─ " : "├─ "}
-                  </span>
-                  <span>{step.name}</span>
-                  <span fg="#6b7280"> </span>
-                  <StatusSymbol status={step.status} conclusion={step.conclusion} />
-                  <span fg="#6b7280"> {formatDuration(step.started_at, step.completed_at)}</span>
+          jobs.map((job, jobIndex) => {
+            const isJobSelected = jobIndex === selectedJobIndex && selectedStepIndex === null;
+
+            return (
+              <box key={job.id} style={{ flexDirection: "column", marginLeft: 1 }}>
+                <text>
+                  {isJobSelected ? (
+                    <span fg="#06b6d4">&gt; </span>
+                  ) : (
+                    <span fg="#6b7280">  </span>
+                  )}
+                  <span fg="#6b7280">{jobIndex === jobs.length - 1 ? "└─ " : "├─ "}</span>
+                  <StatusSymbol status={job.status} conclusion={job.conclusion} />
+                  {isJobSelected ? (
+                    <strong fg="#ffffff"> {job.name}</strong>
+                  ) : (
+                    <span> {job.name}</span>
+                  )}
+                  <span fg="#6b7280"> ({formatDuration(job.started_at, job.completed_at)})</span>
                 </text>
-              ))}
-            </box>
-          ))
+                {job.steps && job.steps.map((step, stepIndex) => {
+                  const isStepSelected = jobIndex === selectedJobIndex && stepIndex === selectedStepIndex;
+
+                  return (
+                    <text key={step.number}>
+                      {isStepSelected ? (
+                        <span fg="#06b6d4">  &gt; </span>
+                      ) : (
+                        <span fg="#6b7280">    </span>
+                      )}
+                      <span fg="#6b7280">
+                        {jobIndex === jobs.length - 1 ? "   " : "│  "}
+                        {stepIndex === job.steps!.length - 1 ? "└─ " : "├─ "}
+                      </span>
+                      {isStepSelected ? (
+                        <strong fg="#ffffff">{step.name}</strong>
+                      ) : (
+                        <span>{step.name}</span>
+                      )}
+                      <span fg="#6b7280"> </span>
+                      <StatusSymbol status={step.status} conclusion={step.conclusion} />
+                      <span fg="#6b7280"> {formatDuration(step.started_at, step.completed_at)}</span>
+                    </text>
+                  );
+                })}
+              </box>
+            );
+          })
         )}
       </box>
     </box>
